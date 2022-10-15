@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { act } from "react-dom/test-utils";
-import { Appointment, AppointmentsDayView } from "../src/Appointment";
+import { Appointment, AppointmentsDayView } from "../src/AppointmentsDayView";
 
 describe("Appointment", () => {
   let container;
@@ -14,16 +14,33 @@ describe("Appointment", () => {
     document.body.replaceChildren(container);
   });
 
+  const appointmentTable = () =>
+    document.querySelector("#appointmentView > table");
+  it("renders a table", () => {
+    render(<Appointment customer={{ firstName: "Ashley" }} />);
+    expect(appointmentTable()).not.toBeNull();
+  });
+
   it("renders the customer first name", () => {
     const customer = { firstName: "Ashley" };
     render(<Appointment customer={customer} />);
-    expect(document.body.textContent).toContain("Ashley");
+    expect(appointmentTable().textContent).toContain("Ashley");
   });
 
   it("renders another customer first name", () => {
     const customer = { firstName: "Jordan" };
     render(<Appointment customer={customer} />);
-    expect(document.body.textContent).toContain("Jordan");
+    expect(appointmentTable().textContent).toContain("Jordan");
+  });
+  it("renders last name of the customer", () => {
+    const customer = { lastName: "White" };
+    render(<Appointment customer={customer} />);
+    expect(appointmentTable().textContent).toContain("White");
+  });
+  it("renders another last name of the customer", () => {
+    const customer = { lastName: "Jones" };
+    render(<Appointment customer={customer} />);
+    expect(appointmentTable().textContent).toContain("Jones");
   });
 });
 

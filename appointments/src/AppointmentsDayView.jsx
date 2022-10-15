@@ -1,5 +1,20 @@
 import React, { useState } from "react";
-export const Appointment = ({ customer }) => <div>{customer.firstName}</div>;
+export const Appointment = ({ customer }) => {
+  return (
+    <div id="appointmentView">
+      <table>
+        <tbody>
+          <tr>
+            <td>Customer</td>
+            <td>
+              {customer.firstName} {customer.lastName}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
 export const AppointmentsDayView = ({ appointments }) => {
   const appointmentTime = (startsAt) => {
