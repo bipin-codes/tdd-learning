@@ -1,14 +1,38 @@
 import React, { useState } from "react";
-export const Appointment = ({ customer }) => {
+export const Appointment = ({
+  customer,
+  stylist,
+  service,
+  notes,
+  startsAt,
+}) => {
+  const readableTime = (time) => {
+    const [h, m] = new Date(startsAt).toTimeString().split(":");
+    return `${h}:${m}`;
+  };
+
   return (
     <div id="appointmentView">
       <table>
+        <h3>{`Today's appointment at ${readableTime(startsAt)}`}</h3>
         <tbody>
           <tr>
             <td>Customer</td>
             <td>
               {customer.firstName} {customer.lastName}
             </td>
+
+            <td>Phone number</td>
+            <td>{customer.phone}</td>
+
+            <td>Stylist</td>
+            <td>{stylist}</td>
+
+            <td>Service</td>
+            <td>{service}</td>
+
+            <td>Notes</td>
+            <td>{notes}</td>
           </tr>
         </tbody>
       </table>
