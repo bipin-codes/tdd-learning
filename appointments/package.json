@@ -20,7 +20,10 @@
     "testEnvironment": "jsdom",
     "globals": {
       "IS_REACT_ACT_ENVIRONMENT": true
-    }
+    },
+    "setupFilesAfterEnv": [
+      "./test/domMatchers.js"
+    ]
   },
   "devDependencies": {
     "@babel/plugin-transform-runtime": "^7.19.1",
