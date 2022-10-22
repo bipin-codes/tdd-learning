@@ -50,3 +50,5 @@ export const change = (target, value) => {
   });
   act(() => target.dispatchEvent(event));
 };
+
+export const labelFor = (fieldname) => element(`label[for=${fieldname}]`);

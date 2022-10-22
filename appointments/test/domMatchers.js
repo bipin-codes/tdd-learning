@@ -1,3 +1,3 @@
 import { toContainText } from "./matchers/toContainText";
-
-expect.extend({ toContainText });
+import { toBeInputFieldOfType } from "./matchers/toBeInputFieldOfType";
+expect.extend({ toContainText, toBeInputFieldOfType });

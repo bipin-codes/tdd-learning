@@ -10,6 +10,7 @@ import {
   submit,
   submitButton,
   change,
+  labelFor,
 } from "./reactTestExtensions";
 import { CustomerForm } from "../src/CustomerForm";
 
@@ -28,9 +29,7 @@ describe("CustomerForm", () => {
     it("renders as a text box", () => {
       render(<CustomerForm original={blankCustomer} />);
 
-      expect(field(fieldName)).not.toBeNull();
-      expect(field(fieldName).tagName).toEqual("INPUT");
-      expect(field(fieldName).type).toEqual("text");
+      expect(field(fieldName)).toBeInputFieldOfType("text");
     });
   };
   const itIncludesTheExistingValue = (fieldName, existingValue) => {
@@ -44,13 +43,13 @@ describe("CustomerForm", () => {
   const itRendersLabel = (fieldName, text) => {
     it("renders a label", () => {
       render(<CustomerForm original={blankCustomer} />);
-      const label = element(`label[for=${fieldName}]`);
-      expect(label).not.toBeNull();
+
+      expect(labelFor(fieldName)).not.toBeNull();
     });
     it(`renders '${text}' label content`, () => {
       render(<CustomerForm original={blankCustomer} />);
-      const label = element(`label[for=${fieldName}]`);
-      expect(label).toContainText(text);
+
+      expect(labelFor(fieldName)).toContainText(text);
     });
   };
   const itAssignsAnIdThatMatchesTheLabelId = (fieldName) => {
