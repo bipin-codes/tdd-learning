@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 
 const timeIncrements = (numTimes, startTime, increment) =>
   Array(numTimes)
@@ -41,6 +41,8 @@ const TimeSlotTable = ({
   salonClosesAt,
   today,
   availableTimeSlots,
+  checkedTimeSlot,
+  handleChange,
 }) => {
   const dates = weeklyDateValues(today);
   const timeSlots = dailyTimeSlots(salonOpensAt, salonClosesAt);
@@ -65,6 +67,8 @@ const TimeSlotTable = ({
                   availableTimeSlots={availableTimeSlots}
                   date={date}
                   timeSlot={timeSlot}
+                  checkedTimeSlot={checkedTimeSlot}
+                  handleChange={handleChange}
                 />
               </td>
             ))}
@@ -75,10 +79,25 @@ const TimeSlotTable = ({
   );
 };
 
-const RadioButtonIfAvailable = ({ availableTimeSlots, date, timeSlot }) => {
+const RadioButtonIfAvailable = ({
+  availableTimeSlots,
+  date,
+  timeSlot,
+  checkedTimeSlot,
+  handleChange,
+}) => {
   const startsAt = mergeDateAndTime(date, timeSlot);
+  const isChecked = startsAt === checkedTimeSlot;
   if (availableTimeSlots.some((timeSlot) => timeSlot.startsAt === startsAt)) {
-    return <input name="startsAt" type={"radio"} value={startsAt}></input>;
+    return (
+      <input
+        name="startsAt"
+        type={"radio"}
+        value={startsAt}
+        checked={isChecked}
+        onChange={handleChange}
+      ></input>
+    );
   }
   return null;
 };
@@ -90,9 +109,24 @@ const AppointmentForm = ({
   service,
   today,
   availableTimeSlots,
+  onSubmit,
 }) => {
+  const [appointment, setAppointment] = useState(original);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(appointment);
+  };
+
+  const handleStartsAtChange = useCallback(({ target: { value } }) => {
+    setAppointment((appointment) => ({
+      ...appointment,
+      startsAt: parseInt(value),
+    }));
+  }, []);
+
   return (
-    <form>
+    <form onSubmit={handleSubmit}>
       <select name="service" value={original.service} readOnly>
         <option />
         {selectableServices.map((s) => (
@@ -104,7 +138,10 @@ const AppointmentForm = ({
         salonClosesAt={salonClosesAt}
         today={today}
         availableTimeSlots={availableTimeSlots}
+        checkedTimeSlot={appointment.startsAt}
+        handleChange={handleStartsAtChange}
       />
+      <input type={"submit"} value={"Add"} />
     </form>
   );
 };
