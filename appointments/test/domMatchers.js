@@ -3,20 +3,12 @@ import { toBeInputFieldOfType } from "./matchers/toBeInputFieldOfType";
 expect.extend({ toContainText, toBeInputFieldOfType });
 
 expect.extend({
-  toBeCalled(received) {
+  toBeCalledWith(received, ...expectedArguments) {
     if (received.receivedArguments() === undefined) {
       return {
         pass: false,
         message: () => "Spy wasn't called.",
       };
-    }
-    return {
-      pass: true,
-      message: () => "Spy was called",
-    };
-  },
-  toBeCalledWith(received, ...expectedArguments) {
-    if (received.receivedArguments() === undefined) {
     }
     const noMatch = !this.equals(
       received.receivedArguments(),
@@ -34,7 +26,7 @@ expect.extend({
     }
     return {
       pass: true,
-      message: "Spy was called with correct arguments!",
+      message: () => "Spy was called",
     };
   },
 });

@@ -23,9 +23,20 @@ const spy = () => {
 };
 
 describe("CustomerForm", () => {
+  const originalFetch = global.fetch;
+  let fetchSpy;
   let blankCustomer = { firstName: "", lastName: "", phoneNumber: "" };
+
+  const bodyOfLastFetchRequest = () =>
+    JSON.parse(fetchSpy.receivedArgument(1).body);
+
   beforeEach(() => {
     initializeReactContainer();
+    fetchSpy = spy();
+    global.fetch = fetchSpy.fn;
+  });
+  afterEach(() => {
+    global.fetch = originalFetch;
   });
 
   it("renders a form", () => {
@@ -83,33 +94,36 @@ describe("CustomerForm", () => {
   // };
   const itSubmitsExistingValue = (fieldName, value) => {
     it("saves existing value when submitted", () => {
-      const submitSpy = spy();
-
       const customer = { [fieldName]: value };
 
-      render(<CustomerForm original={customer} onSubmit={submitSpy.fn} />);
+      render(<CustomerForm original={customer} />);
       click(submitButton());
-      expect(submitSpy).toBeCalledWith(customer);
-
-      // expect(submitSpy).toBeCalled(customer);
-      // expect(submitSpy.receivedArgument(0)).toEqual(customer);
+      // expect(fetchSpy).toBeCalledWith(
+      //   expect.anything(),
+      //   expect.objectContaining({
+      //     body: JSON.stringify(customer),
+      //   })
+      // );
+      expect(bodyOfLastFetchRequest()).toMatchObject(customer);
     });
   };
 
   const itSavesANewValueWhenSubmitted = (fieldName, value) => {
     it("saves new value when submitted", () => {
-      expect.hasAssertions();
-      render(
-        <CustomerForm
-          original={blankCustomer}
-          onSubmit={(props) => {
-            expect(props[fieldName]).toEqual(value);
-          }}
-        />
-      );
+      render(<CustomerForm original={blankCustomer} />);
 
       change(field(fieldName), value);
       click(submitButton());
+      // expect(fetchSpy).toBeCalledWith(
+      //   expect.anything(),
+      //   expect.objectContaining({
+      //     body: JSON.stringify({
+      //       ...blankCustomer,
+      //       [fieldName]: value,
+      //     }),
+      //   })
+      // );
+      expect(bodyOfLastFetchRequest()).toMatchObject({ [fieldName]: value });
     });
   };
 
@@ -145,8 +159,29 @@ describe("CustomerForm", () => {
   });
 
   it("prevents the default action when submitting the form", () => {
-    render(<CustomerForm original={blankCustomer} onSubmit={() => {}} />);
+    render(<CustomerForm original={blankCustomer} />);
     const event = submit(form());
     expect(event.defaultPrevented).toBe(true);
+  });
+  it("sends request to post/customers when submitting the form", () => {
+    render(<CustomerForm original={blankCustomer} />);
+    click(submitButton());
+    expect(fetchSpy).toBeCalledWith(
+      "/customers",
+      expect.objectContaining({ method: "POST" })
+    );
+  });
+  it("calls fetch with the right configuration", () => {
+    render(<CustomerForm original={blankCustomer} />);
+    click(submitButton());
+    expect(fetchSpy).toBeCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+    );
   });
 });
