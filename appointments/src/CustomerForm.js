@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 
-export const CustomerForm = ({ original }) => {
+export const CustomerForm = ({ original, onSave }) => {
   const [customer, setCustomer] = useState(original);
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    fetch("/customers", {
+    const result = await fetch("/customers", {
       method: "POST",
       credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(customer),
     });
+    const customerWithId = await result.json();
+    onSave(customerWithId);
   };
 
   const handleChange = ({ target }) => {
