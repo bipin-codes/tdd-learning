@@ -13,41 +13,44 @@ import {
   element,
 } from "./reactTestExtensions";
 import { CustomerForm } from "../src/CustomerForm";
+import { fetchResponseError, fetchResponseOk } from "./builders/fetch";
+import { bodyOfLastFetchRequest } from "./spyHelpers";
+// const spy = () => {
+//   let returnValue;
+//   let receivedArguments;
+//   return {
+//     fn: (...arg) => {
+//       receivedArguments = arg;
+//       return returnValue;
+//     },
+//     receivedArgument: (n) => receivedArguments[n],
+//     receivedArguments: () => receivedArguments,
+//     stubReturnValue: (value) => (returnValue = value),
+//   };
+// };
 
-const spy = () => {
-  let returnValue;
-  let receivedArguments;
-  return {
-    fn: (...arg) => {
-      receivedArguments = arg;
-      return returnValue;
-    },
-    receivedArgument: (n) => receivedArguments[n],
-    receivedArguments: () => receivedArguments,
-    stubReturnValue: (value) => (returnValue = value),
-  };
-};
-
-const fetchResponseOk = (body) =>
-  Promise.resolve({ ok: true, json: () => Promise.resolve(body) });
-const fetchResponseError = () => Promise.resolve({ ok: false });
+// const fetchResponseOk = (body) =>
+//   Promise.resolve({ ok: true, json: () => Promise.resolve(body) });
+// const fetchResponseError = () => Promise.resolve({ ok: false });
 
 describe("CustomerForm", () => {
-  const originalFetch = global.fetch;
-  let fetchSpy;
+  // const originalFetch = global.fetch;
+  // let fetchSpy;
   let blankCustomer = { firstName: "", lastName: "", phoneNumber: "" };
 
-  const bodyOfLastFetchRequest = () =>
-    JSON.parse(fetchSpy.receivedArgument(1).body);
+  // const bodyOfLastFetchRequest = () => {
+  //   const allCalls = global.fetch.mock.calls;
+  //   const lastCall = allCalls[allCalls.length - 1];
+  //   return JSON.parse(lastCall[1].body);
+  // };
 
   beforeEach(() => {
     initializeReactContainer();
-    fetchSpy = spy();
-    global.fetch = fetchSpy.fn;
-    fetchSpy.stubReturnValue(fetchResponseOk({}));
-  });
-  afterEach(() => {
-    global.fetch = originalFetch;
+    // fetchSpy = spy();
+    // global.fetch = fetchSpy.fn;
+    // fetchSpy.stubReturnValue(fetchResponseOk({}));
+
+    jest.spyOn(global, "fetch").mockResolvedValue(fetchResponseOk({}));
   });
 
   it("renders a form", () => {
@@ -177,7 +180,8 @@ describe("CustomerForm", () => {
   it("sends request to post/customers when submitting the form", async () => {
     render(<CustomerForm original={blankCustomer} onSave={() => {}} />);
     await clickAndWait(submitButton());
-    expect(fetchSpy).toBeCalledWith(
+    // expect(fetchSpy).toBeCalledWith(
+    expect(global.fetch).toBeCalledWith(
       "/customers",
       expect.objectContaining({ method: "POST" })
     );
@@ -185,7 +189,8 @@ describe("CustomerForm", () => {
   it("calls fetch with the right configuration", async () => {
     render(<CustomerForm original={blankCustomer} onSave={() => {}} />);
     await clickAndWait(submitButton());
-    expect(fetchSpy).toBeCalledWith(
+    // expect(fetchSpy).toBeCalledWith(
+    expect(global.fetch).toBeCalledWith(
       expect.anything(),
       expect.objectContaining({
         credentials: "same-origin",
@@ -197,21 +202,26 @@ describe("CustomerForm", () => {
   });
   it("notifies onSave when form is submitted", async () => {
     const customer = { id: 123 };
-    fetchSpy.stubReturnValue(fetchResponseOk(customer));
-    const saveSpy = spy();
-    render(<CustomerForm original={customer} onSave={saveSpy.fn} />);
+    // fetchSpy.stubReturnValue(fetchResponseOk(customer));
+    global.fetch.mockResolvedValue(fetchResponseOk(customer));
+    // const saveSpy = spy();
+    const saveSpy = jest.fn();
+    render(<CustomerForm original={customer} onSave={saveSpy} />);
     await clickAndWait(submitButton());
     expect(saveSpy).toBeCalledWith(customer);
   });
   describe("When post request returns an error", () => {
     beforeEach(() => {
-      fetchSpy.stubReturnValue(fetchResponseError());
+      global.fetch.mockResolvedValue(fetchResponseError());
     });
     it("doesnot notify onSave", async () => {
-      const saveSpy = spy();
-      render(<CustomerForm original={blankCustomer} onSave={saveSpy.fn} />);
+      // const saveSpy = spy();
+      const saveSpy = jest.fn();
+      // render(<CustomerForm original={blankCustomer} onSave={saveSpy.fn} />);
+      render(<CustomerForm original={blankCustomer} onSave={saveSpy} />);
       await clickAndWait(submitButton());
-      expect(saveSpy).not.toBeCalledWith();
+      // expect(saveSpy).not.toBeCalledWith();//This wasn't completely correct when we implemented with our own matcher
+      expect(saveSpy).not.toBeCalled();
     });
     it("renders error message", async () => {
       render(<CustomerForm original={blankCustomer} />);
