@@ -1,32 +1,22 @@
 import { toContainText } from "./matchers/toContainText";
+import { toHaveClass } from "./matchers/toHaveClass";
+import { toBeElementWithTag } from "./matchers/toBeElementWithTag";
 import { toBeInputFieldOfType } from "./matchers/toBeInputFieldOfType";
-expect.extend({ toContainText, toBeInputFieldOfType });
+import {
+  toBeRendered,
+  toBeFirstRendered,
+} from "./matchers/toBeRendered";
+import {
+  toBeRenderedWithProps,
+  toBeFirstRenderedWithProps,
+} from "./matchers/toBeRenderedWithProps";
 
-// expect.extend({
-//   toBeCalledWith(received, ...expectedArguments) {
-//     if (received.receivedArguments() === undefined) {
-//       return {
-//         pass: false,
-//         message: () => "Spy wasn't called.",
-//       };
-//     }
-//     const noMatch = !this.equals(
-//       received.receivedArguments(),
-//       expectedArguments
-//     );
-
-//     if (noMatch) {
-//       return {
-//         pass: false,
-//         message: () =>
-//           "Spy called with wrong arguments" +
-//           received.receivedArguments() +
-//           ".",
-//       };
-//     }
-//     return {
-//       pass: true,
-//       message: () => "Spy was called",
-//     };
-//   },
-// });
+expect.extend({
+  toBeElementWithTag,
+  toBeInputFieldOfType,
+  toContainText,
+  toHaveClass,
+  toBeRendered,
+  toBeRenderedWithProps,
+  toBeFirstRenderedWithProps,
+});

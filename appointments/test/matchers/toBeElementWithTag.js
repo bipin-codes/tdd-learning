@@ -3,30 +3,27 @@ import {
   printExpected,
 } from "jest-matcher-utils";
 
-export const toBeInputFieldOfType = (
+export const toBeElementWithTag = (
   element,
-  expectedType
+  expectedTagName
 ) => {
   const pass =
-    element?.tagName === "INPUT" &&
-    element.type === expectedType;
+    element?.tagName ===
+    expectedTagName.toUpperCase();
 
   const sourceHint = () =>
     matcherHint(
-      "toBeInputFieldOfType",
+      "toBeElementWithTag",
       "element",
-      printExpected(expectedType),
+      printExpected(expectedTagName),
       { isNot: pass }
     );
 
   const receivedText = () => {
-    if (!element) {
+    if (!element || !element.tagName) {
       return "element was not found";
     }
-    if (element?.tagName !== "INPUT") {
-      return `<${element?.tagName.toLowerCase()}>`;
-    }
-    return `<input type=${element.type}>`;
+    return `<${element.tagName.toLowerCase()}>`;
   };
 
   const actualHint = () =>

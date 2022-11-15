@@ -1,20 +1,35 @@
 import React, { useState } from "react";
 
-const Error = ({ hasError }) => {
-  return <p role={"alert"}>{hasError ? "error occurred" : ""}</p>;
-};
+const Error = ({ hasError }) => (
+  <p role="alert">
+    {hasError ? "An error occurred during save." : ""}
+  </p>
+);
 
-export const CustomerForm = ({ original, onSave }) => {
+export const CustomerForm = ({
+  original,
+  onSave,
+}) => {
+  const [error, setError] = useState(false);
+
   const [customer, setCustomer] = useState(original);
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const result = await fetch("/customers", {
+
+  const handleChange = ({ target }) =>
+    setCustomer((customer) => ({
+      ...customer,
+      [target.name]: target.value,
+    }));
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const result = await global.fetch("/customers", {
       method: "POST",
       credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(customer),
     });
     if (result.ok) {
+      setError(false);
       const customerWithId = await result.json();
       onSave(customerWithId);
     } else {
@@ -22,42 +37,36 @@ export const CustomerForm = ({ original, onSave }) => {
     }
   };
 
-  const handleChange = ({ target }) => {
-    setCustomer((customer) => ({
-      ...customer,
-      [target.name]: target.value,
-    }));
-  };
-
-  const [error, setError] = useState(false);
   return (
-    <form id="customer" onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit}>
       <Error hasError={error} />
       <label htmlFor="firstName">First name</label>
       <input
-        type={"text"}
-        id={"firstName"}
+        type="text"
         name="firstName"
+        id="firstName"
         value={customer.firstName}
         onChange={handleChange}
       />
       <label htmlFor="lastName">Last name</label>
       <input
-        type={"text"}
-        id={"lastName"}
+        type="text"
         name="lastName"
+        id="lastName"
         value={customer.lastName}
         onChange={handleChange}
       />
-      <label htmlFor="phoneNumber">Phone number</label>
+      <label htmlFor="phoneNumber">
+        Phone number
+      </label>
       <input
-        type={"text"}
-        id={"phoneNumber"}
+        type="text"
         name="phoneNumber"
+        id="phoneNumber"
         value={customer.phoneNumber}
         onChange={handleChange}
       />
-      <input type="submit" value={"Add"} />
+      <input type="submit" value="Add" />
     </form>
   );
 };

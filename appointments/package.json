@@ -23,7 +23,11 @@
     },
     "setupFilesAfterEnv": [
       "./test/domMatchers.js",
-      "./test/global.js"
+      "./test/globals.js"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/server/"
     ],
     "restoreMocks": true
   },
