@@ -1,19 +1,22 @@
 import React, { useState } from "react";
 
 const Error = ({ hasError }) => (
-  <p role="alert">
-    {hasError ? "An error occurred during save." : ""}
-  </p>
+  <p role="alert">{hasError ? "An error occurred during save." : ""}</p>
 );
 
-export const CustomerForm = ({
-  original,
-  onSave,
-}) => {
+const required = (value) =>
+  !value || value.trim() === "" ? "First name is required" : undefined;
+
+export const CustomerForm = ({ original, onSave }) => {
   const [error, setError] = useState(false);
 
   const [customer, setCustomer] = useState(original);
+  const [validationErrors, setValidationErrors] = useState({});
 
+  const handleBlur = ({ target }) => {
+    const result = required(target.value);
+    setValidationErrors({ ...validationErrors, firstName: result });
+  };
   const handleChange = ({ target }) =>
     setCustomer((customer) => ({
       ...customer,
@@ -37,6 +40,12 @@ export const CustomerForm = ({
     }
   };
 
+  const hasError = (fieldName) => validationErrors[fieldName] !== undefined;
+  const renderError = (fieldName) => (
+    <span id={`${fieldName}Error`} role={"alert"}>
+      {hasError(fieldName) ? validationErrors[fieldName] : ""}
+    </span>
+  );
   return (
     <form onSubmit={handleSubmit}>
       <Error hasError={error} />
@@ -47,7 +56,11 @@ export const CustomerForm = ({
         id="firstName"
         value={customer.firstName}
         onChange={handleChange}
+        aria-describedby="firstNameError"
+        onBlur={handleBlur}
       />
+      {renderError("firstName")}
+
       <label htmlFor="lastName">Last name</label>
       <input
         type="text"
@@ -56,9 +69,7 @@ export const CustomerForm = ({
         value={customer.lastName}
         onChange={handleChange}
       />
-      <label htmlFor="phoneNumber">
-        Phone number
-      </label>
+      <label htmlFor="phoneNumber">Phone number</label>
       <input
         type="text"
         name="phoneNumber"

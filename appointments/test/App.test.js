@@ -1,114 +1,155 @@
 import React from "react";
+import { act } from "react-dom/test-utils";
+import { App } from "../src/App";
 import {
-  element,
   initializeReactContainer,
   render,
+  element,
   click,
   propsOf,
 } from "./reactTestExtensions";
-
-import { App } from "../src/App";
-import { CustomerForm } from "../src/CustomerForm";
-import { AppointmentsDayViewLoader } from "../src/AppointmentsDayViewLoader";
-import { blankCustomer } from "./builders/customer";
-import { act } from "react-dom/test-utils";
 import { AppointmentFormLoader } from "../src/AppointmentFormLoader";
+import { AppointmentsDayViewLoader } from "../src/AppointmentsDayViewLoader";
+import { CustomerForm } from "../src/CustomerForm";
+import { blankCustomer } from "./builders/customer";
 import { blankAppointment } from "./builders/appointment";
-jest.mock("../src/AppointmentsDayViewLoader", () => ({
-  AppointmentsDayViewLoader: jest.fn(() => (
-    <div id="AppointmentsDayViewLoader"></div>
-  )),
-}));
-
-jest.mock("../src/CustomerForm", () => ({
-  CustomerForm: jest.fn(() => <div id="CustomerForm"></div>),
-}));
 
 jest.mock("../src/AppointmentFormLoader", () => ({
-  AppointmentFormLoader: jest.fn(() => <div id="AppointmentFormLoader"></div>),
+  AppointmentFormLoader: jest.fn(() => (
+    <div id="AppointmentFormLoader" />
+  )),
 }));
-
-const beginAddingCustomerAndAppointment = () =>
-  click(element("menu>li>button:first-of-type"));
-
-const exampleCustomer = { id: 123 };
-const saveCustomer = (customer = exampleCustomer) =>
-  act(() => propsOf(CustomerForm).onSave(customer));
-
-const saveAppointment = () =>
-  act(() => propsOf(AppointmentFormLoader).onSave());
+jest.mock("../src/AppointmentsDayViewLoader", () => ({
+  AppointmentsDayViewLoader: jest.fn(() => (
+    <div id="AppointmentsDayViewLoader" />
+  )),
+}));
+jest.mock("../src/CustomerForm", () => ({
+  CustomerForm: jest.fn(() => (
+    <div id="CustomerForm" />
+  )),
+}));
 
 describe("App", () => {
   beforeEach(() => {
     initializeReactContainer();
   });
-  it("initially sows the AppointmentDayViewLoader", () => {
-    render(<App></App>);
+
+  it("initially shows the AppointmentDayViewLoader", () => {
+    render(<App />);
     expect(AppointmentsDayViewLoader).toBeRendered();
   });
+
   it("has a menu bar", () => {
     render(<App />);
     expect(element("menu")).not.toBeNull();
   });
-  it("has a button to initiate add customer and apointment action", () => {
+
+  it("has a button to initiate add customer and appointment action", () => {
     render(<App />);
-    const firstButton = element("menu > li > button:first-of-type");
-    expect(firstButton).toContainText("Add customer and appointment");
+    const firstButton = element(
+      "menu > li > button:first-of-type"
+    );
+    expect(firstButton).toContainText(
+      "Add customer and appointment"
+    );
   });
-  it("displays the Customer form when button is clicked", async () => {
+
+  const beginAddingCustomerAndAppointment = () =>
+    click(
+      element("menu > li > button:first-of-type")
+    );
+
+  it("displays the CustomerForm when button is clicked", async () => {
     render(<App />);
     beginAddingCustomerAndAppointment();
+
     expect(element("#CustomerForm")).not.toBeNull();
   });
-  it("passed a blank original customer object to CustomerForm", async () => {
+
+  it("passes a blank original customer object to CustomerForm", async () => {
     render(<App />);
     beginAddingCustomerAndAppointment();
     expect(CustomerForm).toBeRenderedWithProps(
-      expect.objectContaining({ original: blankCustomer })
+      expect.objectContaining({
+        original: blankCustomer,
+      })
     );
   });
-  it("hides the AppointmentDayViewLoader when button is clicked", () => {
+
+  it("hides the AppointmentsDayViewLoader when button is clicked", async () => {
     render(<App />);
     beginAddingCustomerAndAppointment();
-    expect(element("#AppointmentsDayViewLoader")).toBeNull();
+    expect(
+      element("#AppointmentsDayViewLoader")
+    ).toBeNull();
   });
-  it("hides the button bar when customer form is beign displayed", async () => {
+
+  it("hides the button bar when CustomerForm is being displayed", async () => {
     render(<App />);
     beginAddingCustomerAndAppointment();
     expect(element("menu")).toBeNull();
   });
-  it("displays the AppointmentFormLoader after the CustomerForm is Submitted", async () => {
+
+  const exampleCustomer = { id: 123 };
+
+  const saveCustomer = (customer = exampleCustomer) =>
+    act(() => propsOf(CustomerForm).onSave(customer));
+
+  it("displays the AppointmentFormLoader after the CustomerForm is submitted", async () => {
     render(<App />);
     beginAddingCustomerAndAppointment();
     saveCustomer();
-    expect(element("#AppointmentFormLoader")).not.toBeNull();
+
+    expect(
+      element("#AppointmentFormLoader")
+    ).not.toBeNull();
   });
-  it("passed a blank original appointment object to CustomerForm", async () => {
+
+  it("passes a blank original appointment object to CustomerForm", async () => {
     render(<App />);
     beginAddingCustomerAndAppointment();
     saveCustomer();
-    expect(AppointmentFormLoader).toBeRenderedWithProps(
+
+    expect(
+      AppointmentFormLoader
+    ).toBeRenderedWithProps(
       expect.objectContaining({
-        original: expect.objectContaining(blankAppointment),
+        original: expect.objectContaining(
+          blankAppointment
+        ),
       })
     );
   });
-  it("passes the customer to the appointmentForm", async () => {
+
+  it("passes the customer to the AppointmentForm", async () => {
     const customer = { id: 123 };
     render(<App />);
     beginAddingCustomerAndAppointment();
     saveCustomer(customer);
-    expect(AppointmentFormLoader).toBeRenderedWithProps(
+
+    expect(
+      AppointmentFormLoader
+    ).toBeRenderedWithProps(
       expect.objectContaining({
-        original: expect.objectContaining({ customer: customer.id }),
+        original: expect.objectContaining({
+          customer: customer.id,
+        }),
       })
     );
   });
+
+  const saveAppointment = () =>
+    act(() =>
+      propsOf(AppointmentFormLoader).onSave()
+    );
+
   it("renders AppointmentDayViewLoader after AppointmentForm is submitted", async () => {
     render(<App />);
     beginAddingCustomerAndAppointment();
     saveCustomer();
     saveAppointment();
+
     expect(AppointmentsDayViewLoader).toBeRendered();
   });
 });

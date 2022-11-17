@@ -62,8 +62,15 @@ export const field = (fieldName) => form().elements[fieldName];
 export const submitButton = () => element("input[type=submit]");
 
 export const labelFor = (formElement) => element(`label[for=${formElement}]`);
+
 export const propsOf = (mockComponent) => {
   const lastCall =
     mockComponent.mock.calls[mockComponent.mock.calls.length - 1];
   return lastCall[0];
 };
+export const withFocus = (target, fn) =>
+  act(() => {
+    target.focus();
+    fn();
+    target.blur();
+  });
