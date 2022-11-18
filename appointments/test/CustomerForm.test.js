@@ -196,26 +196,49 @@ describe("CustomerForm", () => {
     });
   });
   describe("Validation", () => {
-    it("renders an alert space for first name validation errors", () => {
-      render(<CustomerForm original={blankCustomer} />);
-      expect(element("#firstNameError[role=alert]")).not.toBeNull();
-    });
-    it("sets alert as the accessible description for the first name field", async () => {
-      render(<CustomerForm original={blankCustomer} />);
-      expect(field("firstName").getAttribute("aria-describedby")).toEqual(
-        "firstNameError"
-      );
-    });
-    it("displays error after blur when first name field is blank", () => {
-      render(<CustomerForm original={blankCustomer} />);
-      withFocus(field("firstName"), () => change(field("firstName"), " "));
-      expect(element("#firstNameError[role=alert]")).toContainText(
-        "First name is required"
-      );
-    });
-    it("it initially has no text in the first name field alert space", async () => {
-      render(<CustomerForm original={blankCustomer} />);
-      expect(element("#firstNameError[role=alert]").textContent).toEqual("");
-    });
+    const errorFor = (fieldName) => element(`#${fieldName}Error[role=alert]`);
+
+    const itRendersAlertForFieldValidation = (fieldName) => {
+      it(`renders an alert space for ${fieldName} validation errors`, () => {
+        render(<CustomerForm original={blankCustomer} />);
+        expect(errorFor(fieldName)).not.toBeNull();
+      });
+    };
+    const itSetsAlertAsAccessibleDescriptionField = (fieldName) => {
+      it(`sets alert as the accessible description for the ${fieldName} field`, async () => {
+        render(<CustomerForm original={blankCustomer} />);
+        expect(field(fieldName).getAttribute("aria-describedby")).toEqual(
+          `${fieldName}Error`
+        );
+      });
+    };
+    const itInvalidatesFieldWithValue = (fieldName, value, description) => {
+      it(`displays error after blur when ${fieldName} field is blank`, () => {
+        render(<CustomerForm original={blankCustomer} />);
+        withFocus(field(fieldName), () => change(field(fieldName), value));
+        expect(errorFor(fieldName)).toContainText(description);
+      });
+    };
+    const itInitiallyHasNoTextInTheAlertSpace = (fieldName) => {
+      it(`it initially has no text in the ${fieldName} field alert space`, async () => {
+        render(<CustomerForm original={blankCustomer} />);
+        expect(errorFor(fieldName).textContent).toEqual("");
+      });
+    };
+
+    itRendersAlertForFieldValidation("firstName");
+    itSetsAlertAsAccessibleDescriptionField("firstName");
+    itInvalidatesFieldWithValue("firstName", " ", "First name is required");
+    itInitiallyHasNoTextInTheAlertSpace("firstName");
+
+    itRendersAlertForFieldValidation("lastName");
+    itSetsAlertAsAccessibleDescriptionField("lastName");
+    itInvalidatesFieldWithValue("lastName", " ", "Last name is required");
+    itInitiallyHasNoTextInTheAlertSpace("lastName");
+
+    itRendersAlertForFieldValidation("phoneNumber");
+    itSetsAlertAsAccessibleDescriptionField("phoneNumber");
+    itInvalidatesFieldWithValue("phoneNumber", " ", "Phone number is required");
+    itInitiallyHasNoTextInTheAlertSpace("phoneNumber");
   });
 });

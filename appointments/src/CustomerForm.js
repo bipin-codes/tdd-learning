@@ -4,8 +4,8 @@ const Error = ({ hasError }) => (
   <p role="alert">{hasError ? "An error occurred during save." : ""}</p>
 );
 
-const required = (value) =>
-  !value || value.trim() === "" ? "First name is required" : undefined;
+const required = (description) => (value) =>
+  !value || value.trim() === "" ? description : undefined;
 
 export const CustomerForm = ({ original, onSave }) => {
   const [error, setError] = useState(false);
@@ -14,8 +14,13 @@ export const CustomerForm = ({ original, onSave }) => {
   const [validationErrors, setValidationErrors] = useState({});
 
   const handleBlur = ({ target }) => {
-    const result = required(target.value);
-    setValidationErrors({ ...validationErrors, firstName: result });
+    const validators = {
+      firstName: required("First name is required"),
+      lastName: required("Last name is required"),
+      phoneNumber: required("Phone number is required"),
+    };
+    const result = validators[target.name](target.value);
+    setValidationErrors({ ...validationErrors, [target.name]: result });
   };
   const handleChange = ({ target }) =>
     setCustomer((customer) => ({
@@ -67,8 +72,12 @@ export const CustomerForm = ({ original, onSave }) => {
         name="lastName"
         id="lastName"
         value={customer.lastName}
+        aria-describedby="lastNameError"
         onChange={handleChange}
+        onBlur={handleBlur}
       />
+      {renderError("lastName")}
+
       <label htmlFor="phoneNumber">Phone number</label>
       <input
         type="text"
@@ -76,7 +85,11 @@ export const CustomerForm = ({ original, onSave }) => {
         id="phoneNumber"
         value={customer.phoneNumber}
         onChange={handleChange}
+        aria-describedby="phoneNumberError"
+        onBlur={handleBlur}
       />
+      {renderError("phoneNumber")}
+
       <input type="submit" value="Add" />
     </form>
   );
