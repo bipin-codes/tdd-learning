@@ -8,7 +8,6 @@ import {
   clickAndWait,
   submitAndWait,
   change,
-  submit,
   submitButton,
   labelFor,
   withFocus,
@@ -86,15 +85,28 @@ describe("CustomerForm", () => {
         [fieldName]: value,
       });
     });
+
   it("does not submit the form when there are validation errors", async () => {
     render(<CustomerForm original={blankCustomer} />);
     await clickAndWait(submitButton());
     expect(global.fetch).not.toBeCalled();
   });
+  const errorFor = (fieldName) => element(`#${fieldName}Error[role=alert]`);
+
   it("renders validation errors after submission fails", async () => {
     render(<CustomerForm original={blankCustomer} />);
     await clickAndWait(submitButton());
     expect(textOf(elements("[role=alert]"))).not.toEqual("");
+  });
+
+  it("renders field validation errors from server", async () => {
+    const errors = {
+      phoneNumber: "Phone number already exists in the system",
+    };
+    global.fetch.mockResolvedValue(fetchResponseError(422, { errors }));
+    render(<CustomerForm original={validCustomer} />);
+    await clickAndWait(submitButton());
+    expect(errorFor("phoneNumber")).toContainText(errors.phoneNumber);
   });
 
   describe("first name field", () => {
@@ -208,8 +220,6 @@ describe("CustomerForm", () => {
     });
   });
   describe("Validation", () => {
-    const errorFor = (fieldName) => element(`#${fieldName}Error[role=alert]`);
-
     const itRendersAlertForFieldValidation = (fieldName) => {
       it(`renders an alert space for ${fieldName} validation errors`, () => {
         render(<CustomerForm original={blankCustomer} />);
