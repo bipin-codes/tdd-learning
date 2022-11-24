@@ -9,12 +9,18 @@ import {
 } from "./formValidation";
 
 const Error = ({ hasError }) => (
-  <p role="alert">{hasError ? "An error occurred during save." : ""}</p>
+  <p role="alert">
+    {hasError ? "An error occurred during save." : ""}
+  </p>
 );
 
-export const CustomerForm = ({ original, onSave }) => {
+export const CustomerForm = ({
+  original,
+  onSave,
+}) => {
   const [submitting, setSubmitting] = useState(false);
-  const [validationErrors, setValidationErrors] = useState({});
+  const [validationErrors, setValidationErrors] =
+    useState({});
   const [error, setError] = useState(false);
 
   const [customer, setCustomer] = useState(original);
@@ -41,7 +47,10 @@ export const CustomerForm = ({ original, onSave }) => {
     ),
   };
 
-  const validateSingleField = (fieldName, fieldValue) => {
+  const validateSingleField = (
+    fieldName,
+    fieldValue
+  ) => {
     const result = validateMany(validators, {
       [fieldName]: fieldValue,
     });
@@ -53,7 +62,9 @@ export const CustomerForm = ({ original, onSave }) => {
 
   const renderError = (fieldName) => (
     <span id={`${fieldName}Error`} role="alert">
-      {hasError(validationErrors, fieldName) ? validationErrors[fieldName] : ""}
+      {hasError(validationErrors, fieldName)
+        ? validationErrors[fieldName]
+        : ""}
     </span>
   );
 
@@ -83,7 +94,10 @@ export const CustomerForm = ({ original, onSave }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const validationResult = validateMany(validators, customer);
+    const validationResult = validateMany(
+      validators,
+      customer
+    );
     if (!anyErrors(validationResult)) {
       await doSave();
     } else {
@@ -118,7 +132,9 @@ export const CustomerForm = ({ original, onSave }) => {
       />
       {renderError("lastName")}
 
-      <label htmlFor="phoneNumber">Phone number</label>
+      <label htmlFor="phoneNumber">
+        Phone number
+      </label>
       <input
         type="text"
         name="phoneNumber"
@@ -130,8 +146,14 @@ export const CustomerForm = ({ original, onSave }) => {
       />
       {renderError("phoneNumber")}
 
-      <input type="submit" value="Add" disabled={submitting} />
-      {submitting ? <span className="submittingIndicator" /> : null}
+      <input
+        type="submit"
+        value="Add"
+        disabled={submitting}
+      />
+      {submitting ? (
+        <span className="submittingIndicator" />
+      ) : null}
     </form>
   );
 };
