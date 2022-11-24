@@ -13,11 +13,13 @@ import {
   withFocus,
   textOf,
   elements,
+  click,
 } from "./reactTestExtensions";
 import { bodyOfLastFetchRequest } from "./spyHelpers";
 import { fetchResponseOk, fetchResponseError } from "./builders/fetch";
 import { CustomerForm } from "../src/CustomerForm";
 import { blankCustomer, validCustomer } from "./builders/customer";
+import { act } from "react-dom/test-utils";
 
 describe("CustomerForm", () => {
   beforeEach(() => {
@@ -273,6 +275,25 @@ describe("CustomerForm", () => {
         change(field("phoneNumber"), "0123456789()+- ")
       );
       expect(errorFor("phoneNumber")).not.toContainText("Only numbers");
+    });
+  });
+
+  describe("submitting indicator", () => {
+    it("displays when form is submitting", async () => {
+      render(<CustomerForm original={validCustomer} onSave={() => {}} />);
+      click(submitButton());
+      await act(async () => {
+        expect(element("span.submittingIndicator")).not.toBeNull();
+      });
+    });
+    it("initially does not display the submitting indicator", () => {
+      render(<CustomerForm original={validCustomer} />);
+      expect(element(".submittingIndicator")).toBeNull();
+    });
+    it("hides after submission", async () => {
+      render(<CustomerForm original={validCustomer} onSave={() => {}} />);
+      await clickAndWait(submitButton());
+      expect(element(".submittingIndicator")).toBeNull();
     });
   });
 });
