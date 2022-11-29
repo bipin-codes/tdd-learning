@@ -119,4 +119,10 @@ describe("CustomerSearch", () => {
     expect(elements("tbody tr")).toHaveLength(1);
     expect(elements("td")[0]).toContainText("Next");
   });
+
+  it("has a previous button", async () => {
+    await renderAndWait(<CustomerSearch />);
+    const btn = buttonWithLabel("Previous");
+    expect(btn).not.toBeNull();
+  });
 });
