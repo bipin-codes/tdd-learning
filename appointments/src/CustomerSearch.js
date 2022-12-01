@@ -30,14 +30,28 @@ const CustomerRow = ({ customer }) => (
 
 export const CustomerSearch = () => {
   const [customers, setCustomers] = useState([]);
-  const [queryString, setQueryString] = useState("");
-  const [
-    previousQueryString,
-    setPreviousQueryString,
-  ] = useState("");
+  const [queryStrings, setQueryStrings] = useState(
+    []
+  );
+
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
+      let queryString = "";
+      if (
+        queryStrings.length > 0 &&
+        searchTerm !== ""
+      ) {
+        queryString =
+          queryStrings[queryStrings.length - 1] +
+          `&searchTerm=${searchTerm}`;
+      } else if (searchTerm !== "") {
+        queryString = `?searchTerm=${searchTerm}`;
+      } else if (queryStrings.length > 0) {
+        queryString =
+          queryStrings[queryStrings.length - 1];
+      }
       const result = await global.fetch(
         `/customers${queryString}`,
         {
@@ -52,22 +66,32 @@ export const CustomerSearch = () => {
     };
 
     fetchData();
-  }, [queryString]);
+  }, [queryStrings, searchTerm]);
 
-  const handlePrevious = useCallback(
-    () => setQueryString(previousQueryString),
-    [previousQueryString]
-  );
-
-  const handleNext = useCallback(async () => {
+  const handleNext = useCallback(() => {
     const after = customers[customers.length - 1].id;
     const newQueryString = `?after=${after}`;
 
-    setPreviousQueryString(queryString);
-    setQueryString(newQueryString);
-  }, [customers, queryString]);
+    setQueryStrings([
+      ...queryStrings,
+      newQueryString,
+    ]);
+  }, [customers, queryStrings]);
+
+  const handlePrevious = useCallback(() => {
+    setQueryStrings(queryStrings.slice(0, -1));
+  }, [queryStrings]);
+
+  const handleSearchTextChanged = ({
+    target: { value },
+  }) => setSearchTerm(value);
   return (
     <>
+      <input
+        placeholder="Enter filter text"
+        value={searchTerm}
+        onChange={handleSearchTextChanged}
+      />
       <SearchButtons
         handleNext={handleNext}
         handlePrevious={handlePrevious}
