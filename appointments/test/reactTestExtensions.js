@@ -16,6 +16,17 @@ export const render = (component) =>
 export const renderAndWait = (component) =>
   act(async () => reactRoot.render(component));
 
+export const renderAdditional = (component) => {
+  const additionalContainer =
+    document.createElement("div");
+  act(() =>
+    ReactDOM.createRoot(additionalContainer).render(
+      component
+    )
+  );
+  return additionalContainer;
+};
+
 export const click = (element) =>
   act(() => element.click());
 
@@ -55,6 +66,9 @@ export const change = (target, value) => {
   act(() => target.dispatchEvent(event));
 };
 
+export const changeAndWait = async (target, value) =>
+  act(async () => change(target, value));
+
 export const withFocus = (target, fn) =>
   act(() => {
     target.focus();
@@ -92,10 +106,8 @@ export const propsOf = (mockComponent) => {
     ];
   return lastCall[0];
 };
+
 export const buttonWithLabel = (label) =>
   elements("button").find(
     ({ textContent }) => textContent === label
   );
-
-export const changeAndWait = async (target, value) =>
-  act(async () => change(target, value));

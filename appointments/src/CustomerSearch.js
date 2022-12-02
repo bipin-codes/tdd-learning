@@ -3,55 +3,125 @@ import React, {
   useEffect,
   useState,
 } from "react";
+import { objectToQueryString } from "./objectToQueryString";
+
+const ToggleButton = ({
+  onClick,
+  toggled,
+  children,
+}) => (
+  <button
+    onClick={onClick}
+    className={toggled ? "toggled" : ""}
+  >
+    {children}
+  </button>
+);
 
 const SearchButtons = ({
+  handleLimit,
   handleNext,
   handlePrevious,
+  limit,
+  hasNext,
+  hasPrevious,
 }) => (
   <menu>
     <li>
-      <button onClick={handleNext}>Next</button>
+      <ToggleButton
+        onClick={() => handleLimit(10)}
+        toggled={limit === 10}
+      >
+        10
+      </ToggleButton>
     </li>
     <li>
-      <button onClick={handlePrevious}>
+      <ToggleButton
+        onClick={() => handleLimit(20)}
+        toggled={limit === 20}
+      >
+        20
+      </ToggleButton>
+    </li>
+    <li>
+      <ToggleButton
+        onClick={() => handleLimit(50)}
+        toggled={limit === 50}
+      >
+        50
+      </ToggleButton>
+    </li>
+    <li>
+      <ToggleButton
+        onClick={() => handleLimit(100)}
+        toggled={limit === 100}
+      >
+        100
+      </ToggleButton>
+    </li>
+    <li>
+      <button
+        onClick={handlePrevious}
+        disabled={!hasPrevious}
+      >
         Previous
+      </button>
+    </li>
+    <li>
+      <button
+        onClick={handleNext}
+        disabled={!hasNext}
+      >
+        Next
       </button>
     </li>
   </menu>
 );
 
-const CustomerRow = ({ customer }) => (
+const CustomerRow = ({
+  customer,
+  renderCustomerActions,
+}) => (
   <tr>
     <td>{customer.firstName}</td>
     <td>{customer.lastName}</td>
     <td>{customer.phoneNumber}</td>
+    <td>{renderCustomerActions(customer)}</td>
   </tr>
 );
 
-export const CustomerSearch = () => {
+export const CustomerSearch = ({
+  renderCustomerActions,
+}) => {
   const [customers, setCustomers] = useState([]);
-  const [queryStrings, setQueryStrings] = useState(
-    []
-  );
-
+  const [lastRowIds, setLastRowIds] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [limit, setLimit] = useState(10);
+
+  const handleSearchTextChanged = ({
+    target: { value },
+  }) => setSearchTerm(value);
+
+  const handleNext = useCallback(() => {
+    const currentLastRowId =
+      customers[customers.length - 1].id;
+    setLastRowIds([...lastRowIds, currentLastRowId]);
+  }, [customers, lastRowIds]);
+
+  const handlePrevious = useCallback(
+    () => setLastRowIds(lastRowIds.slice(0, -1)),
+    [lastRowIds]
+  );
 
   useEffect(() => {
     const fetchData = async () => {
-      let queryString = "";
-      if (
-        queryStrings.length > 0 &&
-        searchTerm !== ""
-      ) {
-        queryString =
-          queryStrings[queryStrings.length - 1] +
-          `&searchTerm=${searchTerm}`;
-      } else if (searchTerm !== "") {
-        queryString = `?searchTerm=${searchTerm}`;
-      } else if (queryStrings.length > 0) {
-        queryString =
-          queryStrings[queryStrings.length - 1];
-      }
+      const after = lastRowIds[lastRowIds.length - 1];
+      const queryString = objectToQueryString({
+        after,
+        searchTerm,
+        limit: limit === 10 ? "" : limit,
+      });
+
       const result = await global.fetch(
         `/customers${queryString}`,
         {
@@ -66,36 +136,26 @@ export const CustomerSearch = () => {
     };
 
     fetchData();
-  }, [queryStrings, searchTerm]);
+  }, [lastRowIds, searchTerm, limit]);
 
-  const handleNext = useCallback(() => {
-    const after = customers[customers.length - 1].id;
-    const newQueryString = `?after=${after}`;
+  const hasNext = customers.length === limit;
+  const hasPrevious = lastRowIds.length > 0;
 
-    setQueryStrings([
-      ...queryStrings,
-      newQueryString,
-    ]);
-  }, [customers, queryStrings]);
-
-  const handlePrevious = useCallback(() => {
-    setQueryStrings(queryStrings.slice(0, -1));
-  }, [queryStrings]);
-
-  const handleSearchTextChanged = ({
-    target: { value },
-  }) => setSearchTerm(value);
   return (
     <>
       <input
-        placeholder="Enter filter text"
         value={searchTerm}
         onChange={handleSearchTextChanged}
+        placeholder="Enter filter text"
       />
       <SearchButtons
         handleNext={handleNext}
         handlePrevious={handlePrevious}
-      ></SearchButtons>
+        hasNext={hasNext}
+        hasPrevious={hasPrevious}
+        handleLimit={setLimit}
+        limit={limit}
+      />
       <table>
         <thead>
           <tr>
@@ -106,14 +166,21 @@ export const CustomerSearch = () => {
           </tr>
         </thead>
         <tbody>
-          {customers.map((customer, idx) => (
+          {customers.map((customer) => (
             <CustomerRow
               customer={customer}
-              key={idx}
+              key={customer.id}
+              renderCustomerActions={
+                renderCustomerActions
+              }
             />
           ))}
         </tbody>
       </table>
     </>
   );
+};
+
+CustomerSearch.defaultProps = {
+  renderCustomerActions: () => {},
 };
