@@ -3,7 +3,8 @@ import {
   itMaintainsExistingState,
   itSetsStatus,
 } from "../reducerGenerators";
-describe("Customer Reducers", () => {
+
+describe("customer reducer", () => {
   it("returns a default state for an undefined existing state", () => {
     expect(reducer(undefined, {})).toEqual({
       customer: {},
@@ -12,53 +13,78 @@ describe("Customer Reducers", () => {
       error: false,
     });
   });
-});
 
-describe("ADD_CUSTOMER_SUBMITTING action", () => {
-  const action = { type: "ADD_CUSTOMER_SUBMITTING" };
-  itMaintainsExistingState(reducer, action);
-  itSetsStatus(reducer, action, "SUBMITTING");
-});
+  describe("ADD_CUSTOMER_SUBMITTING action", () => {
+    const action = {
+      type: "ADD_CUSTOMER_SUBMITTING",
+    };
 
-describe("ADD_CUSTOMER_SUCCESSFUL action", () => {
-  const customer = { id: 123 };
-  const action = {
-    type: "ADD_CUSTOMER_SUCCESSFUL",
-    customer,
-  };
+    itMaintainsExistingState(reducer, action);
+    itSetsStatus(reducer, action, "SUBMITTING");
 
-  itSetsStatus(reducer, action, "SUCCESSFUL");
-  itMaintainsExistingState(reducer, action);
-  it("sets customer to provided customer", () => {
-    expect(reducer(undefined, action)).toMatchObject({
-      customer,
+    it("resets error to false", () => {
+      expect(
+        reducer({ error: true }, action)
+      ).toMatchObject({
+        error: false,
+      });
     });
   });
-});
 
-describe("ADD_CUSTOMER_FAILED action", () => {
-  const action = { type: "ADD_CUSTOMER_FAILED" };
-  itSetsStatus(reducer, action, "FAILED");
-  itMaintainsExistingState(reducer, action);
-  it("sets error to true", () => {
-    expect(reducer(undefined, action)).toMatchObject({
-      error: true,
+  describe("ADD_CUSTOMER_FAILED action", () => {
+    const action = { type: "ADD_CUSTOMER_FAILED" };
+
+    itMaintainsExistingState(reducer, action);
+    itSetsStatus(reducer, action, "FAILED");
+
+    it("sets error to true", () => {
+      expect(
+        reducer(undefined, action)
+      ).toMatchObject({
+        error: true,
+      });
     });
   });
-});
 
-describe("ADD_CUSTOMER_VALIDATION_FAILED", () => {
-  const validationErrors = { field: "error text" };
-  const action = {
-    type: "ADD_CUSTOMER_VALIDATION_FAILED",
-    validationErrors,
-  };
-
-  itSetsStatus(reducer, action, "VALIDATION_FAILED");
-  itMaintainsExistingState(reducer, action);
-  it("sets validation errors to provide errors", () => {
-    expect(reducer(undefined, action)).toMatchObject({
+  describe("ADD_CUSTOMER_VALIDATION_FAILED action", () => {
+    const validationErrors = { field: "error text" };
+    const action = {
+      type: "ADD_CUSTOMER_VALIDATION_FAILED",
       validationErrors,
+    };
+
+    itMaintainsExistingState(reducer, action);
+    itSetsStatus(
+      reducer,
+      action,
+      "VALIDATION_FAILED"
+    );
+
+    it("sets validation errors to provided errors", () => {
+      expect(
+        reducer(undefined, action)
+      ).toMatchObject({
+        validationErrors,
+      });
+    });
+  });
+
+  describe("ADD_CUSTOMER_SUCCESSFUL action", () => {
+    const customer = { id: 123 };
+    const action = {
+      type: "ADD_CUSTOMER_SUCCESSFUL",
+      customer,
+    };
+
+    itMaintainsExistingState(reducer, action);
+    itSetsStatus(reducer, action, "SUCCESSFUL");
+
+    it("sets customer to provided customer", () => {
+      expect(
+        reducer(undefined, action)
+      ).toMatchObject({
+        customer,
+      });
     });
   });
 });
